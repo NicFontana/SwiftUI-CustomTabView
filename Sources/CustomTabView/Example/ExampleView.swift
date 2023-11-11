@@ -18,34 +18,40 @@ struct ExampleView: View {
     }
     
     var body: some View {
-        CustomTabView(
-            tabs: Tab.allCases,
-            selection: $selectedTab,
-            tabBarView: tabBarView,
-            tabBarPosition: .bottom
-        ) { tab in
-                switch tab {
-                case .home:
-                    Text("Home")
-                case .explore:
-                    NavigationView {
-                        List {
-                            ForEach((0..<20).map { $0 }, id: \.self) { item in
-                                NavigationLink(destination: Text("Destination \(item)")) {
-                                    Text("Go to \(item)")
-                                }
-                            }
+        CustomTabView(tabBarView: tabBarView, tabs: Tab.allCases, selection: selectedTab) {
+            Text("Home")
+            
+            NavigationView {
+                List {
+                    ForEach((0..<20).map { $0 }, id: \.self) { item in
+                        NavigationLink(destination: Text("Destination \(item)")) {
+                            Text("Go to \(item)")
                         }
-                        #if os(iOS)
-                        .navigationBarTitle("Explore")
-                        #endif
                     }
-                case .favourites:
-                    Text("Favourites")
-                case .other:
-                    Text("Other")
                 }
+                #if os(iOS)
+                .navigationBarTitle("Explore")
+                #endif
             }
+            
+            InnerView()
+            
+            Text("Other")
+        }
+        .tabBarPosition(.top)
+    }
+}
+
+struct InnerView: View {
+    @State private var position: Edge = .trailing
+    @Environment(\.tabBarPosition) var tabBarPosition: Edge
+    
+    var body: some View {
+        VStack {
+            Text("Favourites")
+
+            Text("Position: \(String(describing: tabBarPosition))")
+        }
     }
 }
 

@@ -7,76 +7,38 @@
 
 import SwiftUI
 
-@available(iOS 13.0, macOS 10.15, *)
-public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content: View>: View {
+struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>: _VariadicView_UnaryViewRoot, KeyboardReadable {
     @Environment(\.layoutDirection) private var layoutDirection: LayoutDirection
+    @Environment(\.tabBarPosition) private var tabBarPosition: Edge
     
-    // Tabs
-    let tabs: [SelectionValue]
-    @Binding var selection: SelectionValue
-    private let tabIndices: [SelectionValue: Int]
-    
-    // TabBar
     let tabBarView: TabBarView
-    let tabBarPosition: Edge
+    let selectedTabIndex: Int
     
-    // Views
-    #if canImport(UIKit)
-    let controlledViews: [UIViewController]
-    #elseif canImport(AppKit)
-    let controlledViews: [NSViewController]
-    #endif
-        
-    public init(
-        tabs: [SelectionValue],
-        selection: Binding<SelectionValue>,
-        tabBarView: TabBarView,
-        tabBarPosition: Edge,
-        @ViewBuilder viewForTab: @escaping (SelectionValue) -> Content
-    ) {
-        self.tabs = tabs
-        self._selection = selection
-        self.tabBarView = tabBarView
-        self.tabBarPosition = tabBarPosition
-        
+    private func contentView(children: _VariadicView.Children) -> some View {
         #if canImport(UIKit)
-        self.controlledViews = tabs.map { UIHostingController(rootView: viewForTab($0)) }
-        #elseif canImport(AppKit)
-        self.controlledViews = tabs.map { NSHostingController(rootView: viewForTab($0)) }
-        #endif
-        
-        var tabIndices: [SelectionValue: Int] = [:]
-        for (index, tab) in tabs.enumerated() {
-            tabIndices[tab] = index
-        }
-        self.tabIndices = tabIndices
-    }
-    
-    private var contentView: some View {
-        #if canImport(UIKit)
-        UITabBarControllerRepresentable(
-            selectedTabIndex: tabIndices[selection] ?? 0,
-            controlledViews: controlledViews
+        return UITabBarControllerRepresentable(
+            selectedTabIndex: selectedTabIndex,
+            controlledViews: children.map { UIHostingController(rootView: $0) }
         )
         #elseif canImport(AppKit)
-        NSTabViewControllerRepresentable(
-            selectedTabIndex: tabIndices[selection] ?? 0,
-            controlledViews: controlledViews
+        return NSTabViewControllerRepresentable(
+            selectedTabIndex: selectedTabIndex,
+            controlledViews: children.map { NSHostingController(rootView: $0) }
         )
         #endif
     }
     
-    private var topBarView: some View {
+    private func topBarView(children: _VariadicView.Children) -> some View {
         VStack(spacing: 0) {
             tabBarView
             
-            contentView
+            contentView(children: children)
         }
     }
     
-    private var bottomBarView: some View {
+    private func bottomBarView(children: _VariadicView.Children) -> some View {
         VStack(spacing: 0) {
-            contentView
+            contentView(children: children)
             
             tabBarView
         }
@@ -86,9 +48,9 @@ public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content:
     // Keyboard visibility
     @State private var isKeyboardVisible: Bool = false
     
-    private var bottomBarViewiOS13: some View {
+    private func bottomBarViewiOS13(children: _VariadicView.Children) -> some View {
         VStack(spacing: 0) {
-            contentView
+            contentView(children: children)
             
             if !isKeyboardVisible {
                 tabBarView
@@ -100,55 +62,93 @@ public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content:
     }
     #endif
     
-    private var leftBarView: some View {
+    private func leftBarView(children: _VariadicView.Children) -> some View {
         HStack(spacing: 0) {
             tabBarView
             
-            contentView
+            contentView(children: children)
         }
     }
     
-    private var rightBarView: some View {
+    private func rightBarView(children: _VariadicView.Children) -> some View {
         HStack(spacing: 0) {
-            contentView
+            contentView(children: children)
             
             tabBarView
         }
     }
     
-    public var body: some View {
+    @ViewBuilder
+    func body(children: _VariadicView.Children) -> some View {
         switch tabBarPosition {
             case .top:
-                topBarView
+                topBarView(children: children)
             case .leading:
                 switch layoutDirection {
                     case .leftToRight:
-                        leftBarView
+                        leftBarView(children: children)
                     case .rightToLeft:
-                        rightBarView
+                        rightBarView(children: children)
                     @unknown default:
-                        leftBarView
+                        leftBarView(children: children)
                 }
             case .bottom:
             #if canImport(UIKit)
                 if #available(iOS 14, *) {
-                    bottomBarView
+                    bottomBarView(children: children)
                         .ignoresSafeArea(.keyboard, edges: .bottom)
                 } else {
-                    bottomBarViewiOS13
+                    bottomBarViewiOS13(children: children)
                 }
             #elseif canImport(AppKit)
-                bottomBarView
+                bottomBarView(children: children)
             #endif
             case .trailing:
                 switch layoutDirection {
                     case .leftToRight:
-                        rightBarView
+                        rightBarView(children: children)
                     case .rightToLeft:
-                        leftBarView
+                        leftBarView(children: children)
                     @unknown default:
-                        rightBarView
+                        rightBarView(children: children)
                 }
+        }
+    }
+}
+
+@available(iOS 13.0, macOS 10.15, *)
+public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content: View>: View {
+    
+    // Tabs
+    let selection: SelectionValue
+    private let tabIndices: [SelectionValue: Int]
+    
+    // TabBar
+    let tabBarView: TabBarView
+    
+    // Content
+    let content: Content
+    
+    public init(tabBarView: TabBarView, tabs: [SelectionValue], selection: SelectionValue, @ViewBuilder content: () -> Content) {
+        self.tabBarView = tabBarView
+        self.selection = selection
+        self.content = content()
+        
+        var tabIndices: [SelectionValue: Int] = [:]
+        for (index, tab) in tabs.enumerated() {
+            tabIndices[tab] = index
+        }
+        self.tabIndices = tabIndices
+    }
+    
+    public var body: some View {
+        _VariadicView.Tree(
+            _CustomTabViewLayout<TabBarView, SelectionValue>(
+                tabBarView: tabBarView,
+                selectedTabIndex: tabIndices[selection] ?? 0
+            )
+        ) {
+            content
         }
     }
 }
