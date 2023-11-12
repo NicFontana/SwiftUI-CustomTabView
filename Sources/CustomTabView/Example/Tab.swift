@@ -2,7 +2,7 @@
 //  Tab.swift
 //
 //
-//  Created by niccolo.fontana on 07/11/23.
+//  Created by Niccolò Fontana on 07/11/23.
 //
 
 import SwiftUI

@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>: _VariadicView_UnaryViewRoot, KeyboardReadable {
+struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>: _VariadicView_UnaryViewRoot {
     @Environment(\.layoutDirection) private var layoutDirection: LayoutDirection
-    @Environment(\.tabBarPosition) private var tabBarPosition: Edge
+    @Environment(\.tabBarPosition) private var tabBarPosition: TabBarPosition
     
     let tabBarView: TabBarView
     let selectedTabIndex: Int
@@ -78,40 +78,65 @@ struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>: _Variad
         }
     }
     
+    private func floatingBarView(children: _VariadicView.Children, edge: Edge) -> some View {
+        let alignment: Alignment
+        switch edge {
+        case .top:
+            alignment = .top
+        case .leading:
+            alignment = .leading
+        case .bottom:
+            alignment = .bottom
+        case .trailing:
+            alignment = .trailing
+        }
+        
+        return ZStack(alignment: alignment, content: {
+            contentView(children: children)
+            
+            tabBarView
+        })
+    }
+    
     @ViewBuilder
     func body(children: _VariadicView.Children) -> some View {
         switch tabBarPosition {
+        case .edge(let edge):
+            switch edge {
             case .top:
                 topBarView(children: children)
             case .leading:
                 switch layoutDirection {
-                    case .leftToRight:
-                        leftBarView(children: children)
-                    case .rightToLeft:
-                        rightBarView(children: children)
-                    @unknown default:
-                        leftBarView(children: children)
+                case .leftToRight:
+                    leftBarView(children: children)
+                case .rightToLeft:
+                    rightBarView(children: children)
+                @unknown default:
+                    leftBarView(children: children)
                 }
             case .bottom:
-            #if canImport(UIKit)
+                #if canImport(UIKit)
                 if #available(iOS 14, *) {
                     bottomBarView(children: children)
                         .ignoresSafeArea(.keyboard, edges: .bottom)
                 } else {
                     bottomBarViewiOS13(children: children)
                 }
-            #elseif canImport(AppKit)
+                #elseif canImport(AppKit)
                 bottomBarView(children: children)
-            #endif
+                #endif
             case .trailing:
                 switch layoutDirection {
-                    case .leftToRight:
-                        rightBarView(children: children)
-                    case .rightToLeft:
-                        leftBarView(children: children)
-                    @unknown default:
-                        rightBarView(children: children)
+                case .leftToRight:
+                    rightBarView(children: children)
+                case .rightToLeft:
+                    leftBarView(children: children)
+                @unknown default:
+                    rightBarView(children: children)
                 }
+            }
+        case .floating(let edge):
+            floatingBarView(children: children, edge: edge)
         }
     }
 }
@@ -154,5 +179,5 @@ public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content:
 }
 
 #if canImport(UIKit)
-extension CustomTabView: KeyboardReadable {}
+extension _CustomTabViewLayout: KeyboardReadable {}
 #endif

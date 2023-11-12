@@ -2,7 +2,7 @@
 //  ExampleView.swift
 //
 //
-//  Created by niccolo.fontana on 07/11/23.
+//  Created by Niccolò Fontana on 07/11/23.
 //
 
 import SwiftUI
@@ -11,15 +11,25 @@ import SwiftUI
 struct ExampleView: View {
     @State private var selectedTab: Tab = .home
     
-    private var tabBarView: ExampleTabBarView {
-        ExampleTabBarView(selection: $selectedTab, onTabSelection: { tab in
+    private var tabBarView: some View {
+        BottomFloatingTabBarView(selection: $selectedTab, onTabSelection: { tab in
             print("Maybe send some analytics here")
         })
+        #if os(iOS)
+        .padding(.bottom, 32)
+        #endif
     }
     
     var body: some View {
         CustomTabView(tabBarView: tabBarView, tabs: Tab.allCases, selection: selectedTab) {
-            Text("Home")
+            #if os(iOS)
+            NavigationView {
+                Text("Home")
+                    .navigationBarTitle("Home")
+            }
+            #else
+                Text("Home")
+            #endif
             
             NavigationView {
                 List {
@@ -33,25 +43,31 @@ struct ExampleView: View {
                 .navigationBarTitle("Explore")
                 #endif
             }
+            .edgesIgnoringSafeArea(.vertical)
             
-            InnerView()
+            #if os(iOS)
+            NavigationView {
+                Text("Favourites")
+                    .navigationBarTitle("Favourites")
+            }
+            #else
+                Text("Favourites")
+            #endif
             
-            Text("Other")
+            #if os(iOS)
+            NavigationView {
+                Text("Other")
+                    .navigationBarTitle("Other")
+            }
+            #else
+                Text("Other")
+            #endif
         }
-        .tabBarPosition(.top)
-    }
-}
-
-struct InnerView: View {
-    @State private var position: Edge = .trailing
-    @Environment(\.tabBarPosition) var tabBarPosition: Edge
-    
-    var body: some View {
-        VStack {
-            Text("Favourites")
-
-            Text("Position: \(String(describing: tabBarPosition))")
-        }
+        .edgesIgnoringSafeArea(.vertical)
+        #if os(iOS)
+        .tabBarPosition(.floating(.bottom))
+        .navigationViewStyle(.stack)
+        #endif
     }
 }
 

@@ -2,7 +2,7 @@
 //  NSTabBarControllerRepresentable.swift
 //  
 //
-//  Created by Fontana, Niccolò on 18/02/23.
+//  Created by Niccolò Fontana on 18/02/23.
 //
 
 #if canImport(AppKit)

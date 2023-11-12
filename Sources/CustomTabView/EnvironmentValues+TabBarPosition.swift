@@ -7,19 +7,24 @@
 
 import SwiftUI
 
+public enum TabBarPosition {
+    case edge(Edge)
+    case floating(Edge)
+}
+
 private struct TabBarPositionEnvironmentKey: EnvironmentKey {
-    static let defaultValue: Edge = .bottom
+    static let defaultValue: TabBarPosition = .edge(.bottom)
 }
 
 public extension EnvironmentValues {
-    var tabBarPosition: Edge {
+    var tabBarPosition: TabBarPosition {
         get { self[TabBarPositionEnvironmentKey.self] }
         set { self[TabBarPositionEnvironmentKey.self] = newValue }
     }
 }
 
 public extension View {
-    func tabBarPosition(_ value: Edge) -> some View {
+    func tabBarPosition(_ value: TabBarPosition) -> some View {
         environment(\.tabBarPosition, value)
     }
 }
