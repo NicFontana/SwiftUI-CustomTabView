@@ -66,10 +66,13 @@ struct VisualEffectView: UIViewRepresentable {
 }
 #endif
 
-#Preview {
-    if #available(macOS 11.0, *) {
-        BottomFloatingTabBarView(selection: .constant(.home)) { _ in }
-    } else {
-        Text("")
+@available(iOS 13.0, macOS 11.0, *)
+struct BottomFloatingTabBarView_Previews: PreviewProvider {
+    static var previews: some View {
+        if #available(macOS 11.0, iOS 14.0, *) {
+            BottomFloatingTabBarView(selection: .constant(.home)) { _ in }
+        } else {
+            Text("")
+        }
     }
 }
