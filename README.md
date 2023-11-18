@@ -16,22 +16,22 @@ CustomTabView is a SwiftUI component that empowers developers to create customiz
 
 ### 1. **Unparalleled Customization**
 
-    CustomTabView gives you full control over the appearance of your tab bar.  
-    Whether you want a minimalistic design or a vibrant, animated tab bar, all you need to do is tailor the tab bar to fit the visual identity of your app and CustomTabView will take care of the rest.
+CustomTabView gives you full control over the appearance of your tab bar.  
+Whether you want a minimalistic design or a vibrant, animated tab bar, all you need to do is tailor the tab bar to fit the visual identity of your app and CustomTabView will take care of the rest.
 
 ### 2. **Honored SwiftUI View Lifecycle Updates**
 
-    Embrace the full potential of SwiftUI's view lifecycle updates with CustomTabView. The library seamlessly integrates with [`onAppear(perform:)`](https://developer.apple.com/documentation/swiftui/view/onappear(perform:)), [`onDisappear(perform:)`](https://developer.apple.com/documentation/swiftui/view/ondisappear(perform:)), and [`task(priority:_:)`](https://developer.apple.com/documentation/swiftui/view/task(priority:_:)) methods, ensuring that each time you switch tabs from the tab bar, these lifecycle events are triggered.
+Embrace the full potential of SwiftUI's view lifecycle updates with CustomTabView. The library seamlessly integrates with [`onAppear(perform:)`](https://developer.apple.com/documentation/swiftui/view/onappear(perform:)), [`onDisappear(perform:)`](https://developer.apple.com/documentation/swiftui/view/ondisappear(perform:)), and [`task(priority:_:)`](https://developer.apple.com/documentation/swiftui/view/task(priority:_:)) methods, ensuring that each time you switch tabs from the tab bar, these lifecycle events are triggered.
 
-    > **Note:**  
-    This behavior distinguishes CustomTabView from common custom tab view implementations that rely on a `ZStack` to overlay tab views, potentially missing out on these crucial view lifecycle updates.
+> **Note:**  
+This behavior distinguishes CustomTabView from common custom tab view implementations that rely on a `ZStack` to overlay tab views, potentially missing out on these crucial view lifecycle updates.
 
 ### 3. **Preserved View State Between Tab Changes**
    
-    CustomTabView preserves the state of your views between tab changes. Whether you're navigating between tabs while performing essential actions in your app, each return to a previously selected tab guarantees finding the view in the exact state you left it.
+CustomTabView preserves the state of your views between tab changes. Whether you're navigating between tabs while performing essential actions in your app, each return to a previously selected tab guarantees finding the view in the exact state you left it.
 
-    > **Note:**  
-    This behavior distinguishes CustomTabView from common custom tab view implementations that use a `switch` mechanism, leading to the recreation of views every time the user switches tabs.
+> **Note:**  
+This behavior distinguishes CustomTabView from common custom tab view implementations that use a `switch` mechanism, leading to the recreation of views every time the user switches tabs.
 
 ## Installation
 
