@@ -65,79 +65,96 @@ For more details, see [Adding Package Dependencies to Your App](https://develope
 
 To integrate CustomTabView into your project, follow these simple steps:
 
-1. Create your custom tab bar:
-    ```swift
-    enum Tab: String, Hashable, CaseIterable {
-        case home, explore, favourites, other
+#### 1. Create your custom tab bar:
+```swift
+enum Tab: String, Hashable, CaseIterable {
+    case home, explore, favourites, other
+}
+
+struct SampleTabBarView: View {
+    @Binding var selection: Tab
+    let onTabSelection: (Tab) -> Void
+
+    var body: some View {
+        HStack {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                tabBarItem(for: tab)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selection = tab
+                        onTabSelection(tab)
+                    }
+            }
+        }
     }
 
-    struct SampleTabBarView: View {
-        @Binding var selection: Tab
-        let onTabSelection: (Tab) -> Void
-    
-        var body: some View {
-            HStack {
-                ForEach(Tab.allCases, id: \.self) { tab in
-                    tabBarItem(for: tab)
-                        .frame(maxWidth: .infinity)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selection = tab
-                            onTabSelection(tab)
-                        }
+    private func tabBarItem(for tab: Tab) -> some View {
+        ...
+    }
+}
+```
+
+#### 2. Initialise a `CustomTabView`:
+```swift
+import SwiftUI
+import CustomTabView
+
+@main
+struct CustomTabViewExampleApp: App {
+
+    @State private var selectedTab: Tab = .home
+
+    private var tabBarView: SampleTabBarView {
+        SampleTabBarView(selection: $selectedTab) { tab in
+            print("Enjoying a custom TabView")
+        }
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            CustomTabView(tabBarView: tabBarView, tabs: Tab.allCases, selection: selectedTab) {
+                NavigationView {
+                    Text("Home")
+                        .navigationBarTitle("Home")
+                }
+
+                NavigationView {
+                    Text("Explore")
+                        .navigationBarTitle("Explore")
+                }
+
+                NavigationView {
+                    Text("Favourites")
+                        .navigationBarTitle("Favourites")
+                }
+
+                NavigationView {
+                    Text("Other")
+                        .navigationBarTitle("Other")
                 }
             }
         }
-
-        private func tabBarItem(for tab: Tab) -> some View {
-            ...
-        }
     }
-    ```
+}
+```
 
-2. Initialise a `CustomTabView`:
-    ```swift
-    import SwiftUI
-    import CustomTabView
+> **Important**  
+The order of the views **must** be reflected in the provided tab bar.
 
-    @main
-    struct CustomTabViewExampleApp: App {
+#### 3. (Optional) Change the tab bar position
+You can change the tab bar position calling the `tabBarPosition(_:)` method on `CustomTabView`:
 
-        @State private var selectedTab: Tab = .home
+```swift
+CustomTabView(tabBarView: tabBarView, tabs: Tab.allCases, selection: selectedTab) {
+    ...
+}
+.tabBarPosition(.edge(.bottom))
+```
 
-        private var tabBarView: SampleTabBarView {
-            SampleTabBarView(selection: $selectedTab) { tab in
-                print("Enjoying a custom TabView")
-            }
-        }
-    
-        var body: some Scene {
-            WindowGroup {
-                CustomTabView(tabBarView: tabBarView, tabs: Tab.allCases, selection: selectedTab) {
-                    NavigationView {
-                        Text("Home")
-                            .navigationBarTitle("Home")
-                    }
-
-                    NavigationView {
-                        Text("Explore")
-                            .navigationBarTitle("Explore")
-                    }
-
-                    NavigationView {
-                        Text("Favourites")
-                            .navigationBarTitle("Favourites")
-                    }
-
-                    NavigationView {
-                        Text("Other")
-                            .navigationBarTitle("Other")
-                    }
-                }
-            }
-        }
-    }
-    ```
+Supported positions are:
+- `edge(Edge)`: to place the tab bar at one edge of the screen
+- `floating(Edge)`: to let the tab bar float above the content while staying at one edge of the screen
 
 ## Contributions and Issues
 
