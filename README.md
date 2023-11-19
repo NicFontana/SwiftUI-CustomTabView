@@ -160,6 +160,11 @@ Supported positions are:
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request. Let's make CustomTabView even better together.
 
+## Acknowledgments
+
+A special thanks to the team at [Moving Parts](https://movingparts.io/) for their insightful article on ["Variadic Views in SwiftUI"](https://movingparts.io/variadic-views-in-swiftui). 
+Their valuable insights and exploration of SwiftUI internals greatly contributed to the development of CustomTabView, allowing me to mimic the elegance of SwiftUI's native component APIs. 
+
 ## License
 
 CustomTabView is available under the MIT license. See [LICENSE](/LICENSE) for details.
