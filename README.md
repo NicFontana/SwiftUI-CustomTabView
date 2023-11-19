@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/images/header.png" height="256"/>
+<img src=".github/images/header.png" style="max-height:384px; width: auto; height: auto;"/>
 
 # SwiftUI CustomTabView
 
@@ -32,6 +32,11 @@ CustomTabView preserves the state of your views between tab changes. Whether you
 
 > **Note:**  
 This behavior distinguishes CustomTabView from common custom tab view implementations that use a `switch` mechanism, leading to the recreation of views every time the user switches tabs.
+
+
+<div align="center">
+    <img src=".github/example.gif"/>
+</div>
 
 ## Installation
 
