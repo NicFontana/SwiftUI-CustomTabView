@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/images/header.png" height="384px"/>
+<img src=".github/images/header.png" height="384px" height="257px"/>
 
 # SwiftUI CustomTabView
 
@@ -35,7 +35,7 @@ This behavior distinguishes CustomTabView from common custom tab view implementa
 
 
 <div align="center">
-    <img src=".github/example.gif" width="25%"/>
+    <img src=".github/example.gif" height="50%"/>
 </div>
 
 ## Installation
