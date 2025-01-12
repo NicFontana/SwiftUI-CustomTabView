@@ -19,6 +19,9 @@ struct UITabBarControllerRepresentable: UIViewControllerRepresentable {
         tabBarController.setViewControllers(controlledViews, animated: false)
         tabBarController.selectedIndex = selectedTabIndex
         tabBarController.tabBar.isHidden = true
+        if #available(iOS 18.0, *) {
+            tabBarController.isTabBarHidden = true
+        }
         return tabBarController
     }
     
