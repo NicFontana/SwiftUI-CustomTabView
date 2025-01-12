@@ -215,7 +215,7 @@ private struct _VariadicViewLayout<TabBarView: View, SelectionValue: Hashable>: 
 }
 
 #if canImport(UIKit)
-extension _CustomTabViewLayout: KeyboardReadable {}
+extension _VariadicViewLayout: KeyboardReadable {}
 #endif
 
 @available(iOS 18.0, macOS 15.0, *)
