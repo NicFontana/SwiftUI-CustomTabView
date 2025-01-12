@@ -59,18 +59,28 @@ public struct CustomTabView<SelectionValue: Hashable, TabBarView: View, Content:
     }
     
     public var body: some View {
-        _VariadicView.Tree(
-            _CustomTabViewLayout<TabBarView, SelectionValue>(
-                tabBarView: tabBarView,
-                selectedTabIndex: tabIndices[selection] ?? 0
-            )
-        ) {
-            content
+        if #available(iOS 18.0, macOS 15.0, *) {
+            Group(subviews: content) { subviews in
+                _LayoutView<TabBarView, SelectionValue>(
+                    tabBarView: tabBarView,
+                    selectedTabIndex: tabIndices[selection] ?? 0,
+                    children: subviews
+                )
+            }
+        } else {
+            _VariadicView.Tree(
+                _VariadicViewLayout<TabBarView, SelectionValue>(
+                    tabBarView: tabBarView,
+                    selectedTabIndex: tabIndices[selection] ?? 0
+                )
+            ) {
+                content
+            }
         }
     }
 }
 
-private struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>: _VariadicView_UnaryViewRoot {
+private struct _VariadicViewLayout<TabBarView: View, SelectionValue: Hashable>: _VariadicView_UnaryViewRoot {
     @Environment(\.layoutDirection) private var layoutDirection: LayoutDirection
     @Environment(\.tabBarPosition) private var tabBarPosition: TabBarPosition
     
@@ -205,5 +215,118 @@ private struct _CustomTabViewLayout<TabBarView: View, SelectionValue: Hashable>:
 }
 
 #if canImport(UIKit)
-extension _CustomTabViewLayout: KeyboardReadable {}
+extension _VariadicViewLayout: KeyboardReadable {}
 #endif
+
+@available(iOS 18.0, macOS 15.0, *)
+private struct _LayoutView<TabBarView: View, SelectionValue: Hashable>: View {
+    @Environment(\.layoutDirection) private var layoutDirection: LayoutDirection
+    @Environment(\.tabBarPosition) private var tabBarPosition: TabBarPosition
+    
+    let tabBarView: TabBarView
+    let selectedTabIndex: Int
+    let children: SubviewsCollection
+
+    private func contentView(children: SubviewsCollection) -> some View {
+        #if canImport(UIKit)
+        return UITabBarControllerRepresentable(
+            selectedTabIndex: selectedTabIndex,
+            controlledViews: children.map { UIHostingController(rootView: $0) }
+        )
+        #elseif canImport(AppKit)
+        return NSTabViewControllerRepresentable(
+            selectedTabIndex: selectedTabIndex,
+            controlledViews: children.map { NSHostingController(rootView: $0) }
+        )
+        #endif
+    }
+    
+    private func topBarView(children: SubviewsCollection) -> some View {
+        VStack(spacing: 0) {
+            tabBarView
+            
+            contentView(children: children)
+        }
+    }
+    
+    private func bottomBarView(children: SubviewsCollection) -> some View {
+        VStack(spacing: 0) {
+            contentView(children: children)
+            
+            tabBarView
+        }
+    }
+    
+    private func leftBarView(children: SubviewsCollection) -> some View {
+        HStack(spacing: 0) {
+            tabBarView
+            
+            contentView(children: children)
+        }
+    }
+    
+    private func rightBarView(children: SubviewsCollection) -> some View {
+        HStack(spacing: 0) {
+            contentView(children: children)
+            
+            tabBarView
+        }
+    }
+    
+    private func floatingBarView(children: SubviewsCollection, edge: Edge) -> some View {
+        let alignment: Alignment
+        switch edge {
+        case .top:
+            alignment = .top
+        case .leading:
+            alignment = .leading
+        case .bottom:
+            alignment = .bottom
+        case .trailing:
+            alignment = .trailing
+        }
+        
+        return ZStack(alignment: alignment, content: {
+            contentView(children: children)
+            
+            tabBarView
+        })
+    }
+    
+    var body: some View {
+        switch tabBarPosition {
+        case .edge(let edge):
+            switch edge {
+            case .top:
+                topBarView(children: children)
+            case .leading:
+                switch layoutDirection {
+                case .leftToRight:
+                    leftBarView(children: children)
+                case .rightToLeft:
+                    rightBarView(children: children)
+                @unknown default:
+                    leftBarView(children: children)
+                }
+            case .bottom:
+                #if canImport(UIKit)
+                bottomBarView(children: children)
+                    .ignoresSafeArea(.keyboard, edges: .bottom)
+                #elseif canImport(AppKit)
+                bottomBarView(children: children)
+                #endif
+            case .trailing:
+                switch layoutDirection {
+                case .leftToRight:
+                    rightBarView(children: children)
+                case .rightToLeft:
+                    leftBarView(children: children)
+                @unknown default:
+                    rightBarView(children: children)
+                }
+            }
+        case .floating(let edge):
+            floatingBarView(children: children, edge: edge)
+        }
+    }
+}
