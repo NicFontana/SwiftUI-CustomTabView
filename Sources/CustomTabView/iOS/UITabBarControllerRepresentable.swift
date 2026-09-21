@@ -27,7 +27,9 @@ struct UITabBarControllerRepresentable: UIViewControllerRepresentable {
                 (viewControllers[i] as? UIHostingController)?.rootView = subviews[i]
             }
         }
-        tabBarController.selectedIndex = selectedTabIndex
+        if tabBarController.selectedIndex != selectedTabIndex {
+            tabBarController.selectedIndex = selectedTabIndex
+        }
     }
 }
 
@@ -51,7 +53,9 @@ struct UITabBarControllerRepresentable_iOS18: UIViewControllerRepresentable {
                 (viewControllers[i] as? UIHostingController)?.rootView = subviews[i]
             }
         }
-        tabBarController.selectedIndex = selectedTabIndex
+        if tabBarController.selectedIndex != selectedTabIndex {
+            tabBarController.selectedIndex = selectedTabIndex
+        }
     }
 }
 #endif
